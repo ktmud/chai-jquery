@@ -11,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/chaijs/chai-jquery/issues"
   },
-  "main": "./chai-jquery",
+  "main": "./index",
   "engines": {
     "node": ">= 0.4.0"
   },
