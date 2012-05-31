@@ -1,24 +1,28 @@
 describe("jQuery assertions", function(){
-  var inspect = chai.inspect;
+  var inspect;
 
-  chai.use(function (chai) {
-    chai.Assertion.prototype.fail = function (message) {
-      new chai.Assertion(this.obj).is.a('function');
+  chai.use(function (chai, utils) {
+    inspect = utils.inspect;
+
+    chai.Assertion.addMethod('fail', function (message) {
+      var obj = utils.flag(this, 'object');
+
+      new chai.Assertion(obj).is.a('function');
 
       try {
-        this.obj();
-        this.assert(false, 'expected ' + this.inspect + ' to fail');
+        obj();
       } catch (err) {
         this.assert(
             err instanceof chai.AssertionError
-          , 'expected ' + this.inspect + ' to fail, but it threw ' + inspect(err));
+          , 'expected #{this} to fail, but it threw ' + inspect(err));
         this.assert(
             err.message === message
-          , 'expected ' + this.inspect + ' to fail with ' + inspect(message) + ', but got ' + inspect(err.message))
+          , 'expected #{this} to fail with ' + inspect(message) + ', but got ' + inspect(err.message));
+        return;
       }
 
-      return this;
-    };
+      this.assert(false, 'expected #{this} to fail');
+    });
   });
 
   describe("attr", function(){
@@ -508,29 +512,68 @@ describe("jQuery assertions", function(){
 
   describe("contain", function(){
     it("preserves existing behavior on non-jQuery objects", function(){
+      "example text".should.contain('example');
+      "foo".should.not.contain('bar');
       ({foo: 1, bar: 2}).should.contain.keys('foo');
+
+      (function(){
+        "foo".should.contain('bar');
+      }).should.fail("expected 'foo' to include 'bar'")
+    });
+
+    var subject = $('<div><span>example text</span></div>');
+
+    it("passes when the selection contains the given text", function(){
+      subject.should.contain('example');
+    });
+
+    it("passes negated when the selection does not contain the given text", function(){
+      subject.should.not.contain('nonesuch');
+    });
+
+    it("fails when the selection does not contain the given text", function(){
+      (function(){
+        subject.should.contain('nonesuch');
+      }).should.fail("expected " + inspect(subject) + " to contain 'nonesuch'");
+    });
+
+    it("fails negated when the selection contains the given text", function(){
+      (function(){
+        subject.should.not.contain("example");
+      }).should.fail("expected " + inspect(subject) + " not to contain 'example'");
+    });
+
+    it("handles quotes", function(){
+      $('<div>"quote"</div>').should.contain('"quote"');
+      $("<div>'quote'</div>").should.contain("'quote'");
+    });
+  });
+
+  describe("have", function(){
+    it("preserves existing behavior on non-jQuery objects", function(){
+      ({foo: 1, bar: 2}).should.have.property('foo');
     });
 
     var subject = $('<div><span></span></div>');
 
-    it("passes when the selection matches the given selector", function(){
-      subject.should.contain('span');
+    it("passes when the selection has the given selector", function(){
+      subject.should.have('span');
     });
 
-    it("passes negated when the selection does not match the given selector", function(){
-      subject.should.not.contain('div');
+    it("passes negated when the selection does not have the given selector", function(){
+      subject.should.not.have('div');
     });
 
-    it("fails when the selection does not match the given selector", function(){
+    it("fails when the selection does not have the given selector", function(){
       (function(){
-        subject.should.contain('div');
-      }).should.fail("expected " + inspect(subject) + " to contain 'div'");
+        subject.should.have('div');
+      }).should.fail("expected " + inspect(subject) + " to have 'div'");
     });
 
-    it("fails negated when the selection matches the given selector", function(){
+    it("fails negated when the selection has the given selector", function(){
       (function(){
-        subject.should.not.contain("span");
-      }).should.fail("expected " + inspect(subject) + " not to contain 'span'");
+        subject.should.not.have("span");
+      }).should.fail("expected " + inspect(subject) + " not to have 'span'");
     });
   });
 });

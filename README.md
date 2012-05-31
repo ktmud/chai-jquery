@@ -5,7 +5,7 @@ provides a set of jQuery-specific assertions.
 
 ## Usage
 
-Include `chai-jquery.js` in your test file, after `chai.js` (version 0.3.3 or later):
+Include `chai-jquery.js` in your test file, after `chai.js` (version 1.0.0-rc1 or later):
 
     <script src="chai-jquery.js"></script>
 
@@ -106,11 +106,26 @@ not a jQuery object, or if `be` is not called as a function, the original implem
     expect($('#empty')).to.be(':empty');
 
 ### `contain(selector)`
-Assert that the selection contains at least one instance of the given selector, using [`.find()`](http://api.jquery.com/find/).
-If the object asserted against is not a jQuery object, the original implementation will be called.
+Assert that the selection contains the given text, using [`:contains()`](http://api.jquery.com/contains-selector/).
+If the object asserted against is not a jQuery object, or if `contain` is not called as a function, the original
+implementation will be called.
 
-    $('body').should.contain('h1');
-    expect($('#content')).to.contain('section');
+    $('body').should.contain('text');
+    expect($('#content')).to.contain('text');
+
+### `have(selector)`
+Assert that the selection contains at least one element which has a descendant matching the given selector,
+using [`.has()`](http://api.jquery.com/has/). If the object asserted against is not a jQuery object, or if `have`
+is not called as a function, the original implementation will be called.
+
+    $('body').should.have('h1');
+    expect($('#content')).to.have('div');
+
+## Contributing
+
+To run the test suite, run `npm install` (requires
+[Node.js](http://nodejs.org/) to be installed on your system), and open
+`test/index.html` in your web browser.
 
 ## License
 
